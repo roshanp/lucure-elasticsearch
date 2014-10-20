@@ -70,3 +70,7 @@ curl -XPUT 'http://localhost:9200/restrictedtest/employee/1' -d '{
 	Should not return document:
 	curl -XPOST 'localhost:9200/restrictedtest/_search?pretty&auth=U' -d '{ "fields" : ["*"], "query": { "restricted": { "auth": "U", "query": { "term": { "eyeColor": "blue"}}} }}'	
 	</pre>
+	<pre>
+	Should return part of the document:
+	curl -XPOST 'localhost:9200/restrictedtest/_search?pretty&auth=U' -d '{ "fields" : ["*"], "query": { "restricted": { "auth": "U", "query": { "term": { "age": 26}}} }}'
+	</pre>

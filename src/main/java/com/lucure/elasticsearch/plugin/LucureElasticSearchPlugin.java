@@ -4,7 +4,7 @@ import com.lucure.elasticsearch.LucureInternalIndexShard;
 import org.elasticsearch.common.inject.AbstractModule;
 import org.elasticsearch.common.inject.Module;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.query.LucureQueryParser;
+import com.lucure.elasticsearch.LucureQueryParser;
 import org.elasticsearch.index.shard.service.InternalIndexShard;
 import org.elasticsearch.plugins.AbstractPlugin;
 

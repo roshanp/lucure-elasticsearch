@@ -1,4 +1,4 @@
-package org.elasticsearch.index.query;
+package com.lucure.elasticsearch;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;

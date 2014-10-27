@@ -165,9 +165,13 @@ public class LucureRestrictedMapper extends AbstractFieldMapper<Object> {
     protected void parseCreateField(ParseContext context, List<Field> fields) throws IOException {
         XContentParser parser = context.parser();
         XContentParser.Token token = parser.currentToken();
-        if (token == XContentParser.Token.VALUE_STRING) {
+        if (token == XContentParser.Token.VALUE_STRING ||
+            token == XContentParser.Token.VALUE_BOOLEAN ||
+            token == XContentParser.Token.VALUE_NUMBER) {
             if (fieldType.indexed() || fieldType.stored()) {
-                Field field = new RestrictedField(names.indexName(), parser.text(), fieldType, defaultVisibility);
+                final IndexableField indexableField = parseMapperField(context);
+                Field field = new RestrictedField(names.indexName(), RestrictedField.toObject(
+                  indexableField), fieldType, defaultVisibility);
                 field.setBoost(boost);
                 fields.add(field);
             }
@@ -185,12 +189,7 @@ public class LucureRestrictedMapper extends AbstractFieldMapper<Object> {
                 throw new MapperParsingException("failed to parse [" + names.fullName() + "]. Expecting 'val' field");
             }
             parser.nextToken();
-            ParseContext.Document valDoc
-              = new ParseContext.Document();
-            final ParseContext.Document restoreDoc = context.switchDoc(valDoc);
-            restrictedMapper.parse(context);
-            valDoc = context.switchDoc(restoreDoc);
-            final IndexableField first = Iterables.getFirst(valDoc, null);
+            final IndexableField first = parseMapperField(context);
             ColumnVisibility cv = defaultVisibility;
             if(first != null) {
                 token = parser.nextToken();
@@ -210,12 +209,23 @@ public class LucureRestrictedMapper extends AbstractFieldMapper<Object> {
                 }
 
                 if (fieldType.indexed() || fieldType.stored()) {
-                    Field field = new RestrictedField(first, cv);
+                    //TODO: Is it ok to ignore the fieldType from the field
+                    Field field = new RestrictedField(name(), RestrictedField.toObject(first), fieldType, cv);
                     field.setBoost(boost);
                     fields.add(field);
                 }
             }
         }
+    }
+
+    private IndexableField parseMapperField(ParseContext context)
+      throws IOException {
+        ParseContext.Document valDoc
+          = new ParseContext.Document();
+        final ParseContext.Document restoreDoc = context.switchDoc(valDoc);
+        restrictedMapper.parse(context);
+        valDoc = context.switchDoc(restoreDoc);
+        return Iterables.getFirst(valDoc, null);
     }
 
     @Override
